@@ -3,6 +3,10 @@ LRZ Sync+Share Library
 
 This little library makes it easy to upload and manage files on LRZ Sync+Share.
 
+Install::
+
+    pip install lrz-sync-share
+
 Usage::
 
     from lrz_sync_share import lrz_session

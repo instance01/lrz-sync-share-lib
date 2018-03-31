@@ -23,12 +23,12 @@ class wapi(object):
 
 class folders(wapi):
     def __init__(self, json_data):
-        super().__init__(json_data, "name")
+        super(folders, self).__init__(json_data, "name")
 
 
 class files(wapi):
     def __init__(self, json_data):
-        super().__init__(json_data, "fileName")
+        super(files, self).__init__(json_data, "fileName")
 
 
 class lrz_session(object):
@@ -49,6 +49,8 @@ class lrz_session(object):
             "autoLogin": "true"
         }
         self.r = self.session.post(LOGIN_URL, data=fields)
+        if not self.session.cookies.get_dict():
+            print("Error: Could not log in.")
 
     def login(self):
         self._login()
@@ -64,6 +66,10 @@ class lrz_session(object):
 
     def get_root_folders(self):
         token = self.get_csrf_token()
+        if not token:
+            print("Error: CSRF token not found. "\
+                    "Either site structure changed or you're not logged in.")
+            return
 
         r = self.session.get(FOLDERS_URL % token)
 
@@ -72,7 +78,8 @@ class lrz_session(object):
 
     def get_files_in_folder(self, foldername):
         if not self.folders:
-            self.get_root_folders()
+            if not self.get_root_folders():
+                return
 
         token = self.get_csrf_token()
         urlID = self.folders.obj[foldername]["urlID"]
@@ -82,6 +89,10 @@ class lrz_session(object):
         return files(r.text)
 
     def get_link(self, foldername, filename):
+        if not self.folders:
+            if not self.get_root_folders():
+                return
+
         root_folder, rest_folders = self.parse_foldername(foldername)
 
         urlID = self.folders.obj[root_folder]["urlID"]
@@ -102,6 +113,10 @@ class lrz_session(object):
         return root_folder, rest_folders
 
     def upload(self, foldername, filename):
+        if not self.folders:
+            if not self.get_root_folders():
+                return
+
         root_folder, rest_folders = self.parse_foldername(foldername)
 
         folder = self.folders.obj[root_folder]

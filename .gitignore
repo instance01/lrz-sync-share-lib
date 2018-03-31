@@ -2,4 +2,6 @@ config.py
 *.swp
 __pycache__
 *.pyc
-/dist/
+dist/
+lrz_sync_share.egg-info/
+build/
